@@ -1,0 +1,190 @@
+﻿﻿@{
+    ViewBag.Title = "Employee Filter";
+}
+
+<div class="content-body">
+    <h1>Employee Filter</h1>
+
+    <!-- Filter Form -->
+    <form id="filterForm">
+        <div class="dropdown" style="width:100%">
+            <div class="d-flex flex-grow-1">
+                <div>
+                    <label for="organizationSelect">Organization:</label>
+                    <select class="form-control" id="OrganizationId" aria-label="Default select example" asp-items="ViewBag.Organizations">
+                        <option selected value="">Select Organization</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="departmentSelect">Department:</label>
+                    <select class="form-control" id="DepartmentId" aria-label="Default select example" asp-items="ViewBag.Departments">
+                        <option selected value="">Select Department</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="positionSelect">Position:</label>
+                    <select class="form-control" id="PositionId" aria-label="Default select example" asp-items="ViewBag.Positions">
+                        <option selected value="">Select Position</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="filterButton">Filter</button>
+        </div>
+    </form>
+
+
+    <table id="employeeTable" class="table">
+        <thead>
+            <tr>
+                <th>Organization</th>
+                <th>Department</th>
+                <th>Position</th>
+
+                <th>Salary</th>
+            </tr>
+        </thead>
+        <tbody id="FilterTableBody">
+        </tbody>
+    </table>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function (){
+        var actionUrl = '@Url.Action("GetFilter", "Home")';
+        fetchData(actionUrl);
+        $('#OrganizationId').change(function () {
+            var organizationId = $(this).val();
+            if (organizationId) {
+                fetchDepartments(organizationId);
+            } else {
+                // Reset department and position dropdowns if no organization is selected
+                $('#DepartmentId').empty().append('<option selected value="">Select Department</option>');
+                $('#PositionId').empty().append('<option selected value="">Select Position</option>');
+            }
+        });
+        $('#DepartmentId').change(function () {
+            var departmentId = $(this).val();
+            var organizationId = $('#OrganizationId').val(); // Get selected organization
+
+            if (departmentId) {
+                fetchPositions(organizationId, departmentId);
+            } else {
+                $('#PositionId').empty().append('<option selected value="">Select Position</option>');
+            }
+        });
+
+    });
+    function fetchDepartments(organizationId) {
+        $.ajax({
+            url: '@Url.Action("GetDepartments", "Home")', // Adjust as necessary
+            method: 'GET',
+            data: { organizationId: organizationId },
+            success: function (data) {
+                // Clear and populate the department dropdown
+                $('#DepartmentId').empty().append('<option selected value="">Select Department</option>');
+                data.forEach(function (department) {
+                    $('#DepartmentId').append(`<option value="${department.departmentId}">${department.departmentName}</option>`);
+                });
+                // Clear positions dropdown
+                $('#PositionId').empty().append('<option selected value="">Select Position</option>');
+            },
+            error: function (error) {
+                console.error("Error fetching departments:", error);
+            }
+        });
+    }
+
+    function fetchPositions(organizationId, departmentId) {
+        $.ajax({
+            url: '@Url.Action("GetPositions", "Home")', // Adjust as necessary
+            method: 'GET',
+            data: { organizationId: organizationId, departmentId: departmentId },
+            success: function (data) {
+                // Clear and populate the position dropdown
+                $('#PositionId').empty().append('<option selected value="">Select Position</option>');
+                data.forEach(function (position) {
+                    $('#PositionId').append(`<option value="${position.positionId}">${position.positionTitle}</option>`);
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching positions:", error);
+            }
+        });
+    }
+
+    function fetchData(actionUrl){
+       $.ajax({
+            url: actionUrl,
+            method: 'GET',
+            success: function (data) {
+
+
+                $('#FilterTableBody').empty();
+
+
+                data.forEach(function (filter) {
+                    $('#FilterTableBody').append(`z
+                                            <tr id="trtag_${filter.PostMapId}">
+                                                 <td>${filter.organizationName}</td>
+                                                 <td>${filter.departmentName}</td>
+                                                 <td>${filter.positionTitle}</td>
+                                                         <td>${filter.averageSalary}</td>
+
+                                            </tr>
+
+                                    `);
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching position filters:", error);
+            }
+        });
+    }
+
+    $('#filterButton').click(function () {
+        // Get selected values
+        var organizationId = $('#OrganizationId').val();
+        var departmentId = $('#DepartmentId').val();
+        var positionId = $('#PositionId').val();
+
+        // Fetch filtered data
+        $.ajax({
+            url: "/Home/GetFilter",
+            method: 'GET',
+            data: {
+                organizationId: organizationId ? organizationId : null,
+                departmentId: departmentId ? departmentId : null,
+                positionId: positionId ? positionId : null
+            },
+            success: function (data) {
+                // Clear existing table rows
+                $('#FilterTableBody').empty();
+
+                // Populate the table with retrieved data
+                if (data.length > 0) {
+                    data.forEach(function (filter) {
+                        $('#FilterTableBody').append(`
+                                    <tr>
+                                        <td>${filter.organizationName}</td>
+                                        <td>${filter.departmentName}</td>
+                                        <td>${filter.positionTitle}</td>
+                                        <td>${filter.averageSalary}</td>
+                                    </tr>
+                                `);
+                    });
+                } else {
+                    $('#FilterTableBody').append('<tr><td colspan="4">No records found</td></tr>');
+                }
+            },
+            error: function (error) {
+                console.error("Error fetching employee data:", error);
+                $('#FilterTableBody').append('<tr><td colspan="4">Error fetching data</td></tr>');
+            }
+        });
+    });
+
+</script>
+
