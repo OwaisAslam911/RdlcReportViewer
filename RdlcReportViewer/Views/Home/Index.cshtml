@@ -1,5 +1,5 @@
-﻿﻿@{
-    ViewBag.Title = "Employee Filter";
+﻿@{
+    ViewBag.Title = "Home Page";
 }
 
 <div class="content-body">
@@ -11,22 +11,40 @@
             <div class="d-flex flex-grow-1">
                 <div>
                     <label for="organizationSelect">Organization:</label>
-                    <select class="form-control" id="OrganizationId" aria-label="Default select example" asp-items="ViewBag.Organizations">
+                    <select class="form-control" id="OrganizationId" aria-label="Default select example">
+
                         <option selected value="">Select Organization</option>
+                        @foreach (var item in ViewBag.Organizations)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+
+                        }
                     </select>
                 </div>
 
                 <div>
                     <label for="departmentSelect">Department:</label>
-                    <select class="form-control" id="DepartmentId" aria-label="Default select example" asp-items="ViewBag.Departments">
-                        <option selected value="">Select Department</option>
+                    <select class="form-control" id="OrganizationId" aria-label="Default select example">
+
+                        <option selected value="">Select Organization</option>
+                        @foreach (var item in ViewBag.Departments)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+
+                        }
                     </select>
                 </div>
 
                 <div>
                     <label for="positionSelect">Position:</label>
-                    <select class="form-control" id="PositionId" aria-label="Default select example" asp-items="ViewBag.Positions">
-                        <option selected value="">Select Position</option>
+                    <select class="form-control" id="OrganizationId" aria-label="Default select example">
+
+                        <option selected value="">Select Organization</option>
+                        @foreach (var item in ViewBag.Positions)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+
+                        }
                     </select>
                 </div>
             </div>
@@ -34,6 +52,7 @@
         </div>
     </form>
 
+    <asp:ReportViewer ID="ReportViewer1" runat="server" Width="100%" Height="600px" />
 
     <table id="employeeTable" class="table">
         <thead>
@@ -41,7 +60,6 @@
                 <th>Organization</th>
                 <th>Department</th>
                 <th>Position</th>
-
                 <th>Salary</th>
             </tr>
         </thead>

@@ -20,6 +20,8 @@ namespace RdlcReportViewer.Models
         public DateTime CreatedAt { get; set; }
         public string CreatedBy { get; set; }
         public decimal Salary { get; set; }
+        public decimal JoiningDate { get; set; }
+        public decimal Status { get; set; }
         
     }
 }
@@ -38,6 +40,6 @@ public class EmployeeViewModel
     public string DepartmentName { get; set; }
     public string OrganizationName { get; set; }
     public int AverageSalary { get; set; }
-    public int Gender { get; set; }
-
+    public int JoiningDate { get; set; }
+    public decimal Status { get; set; }
 }

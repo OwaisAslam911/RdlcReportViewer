@@ -51,11 +51,8 @@ namespace RdlcReportViewer.Controllers
         {
             string connectionString = ConfigurationManager.ConnectionStrings["MyConnection"].ConnectionString;
 
-            string connectionStatusMessage = string.Empty;
-
             using (SqlConnection db = new SqlConnection(connectionString))
             {
-
 
                 var organizations = await db.QueryAsync<Organizations>("SELECT * FROM Organizations");
                 var departments = await db.QueryAsync<Departments>("SELECT * FROM Departments");
@@ -67,6 +64,52 @@ namespace RdlcReportViewer.Controllers
             }
             return View();
         }
+
+        [HttpGet]
+        public JsonResult GetDepartments(int organizationId)
+        {
+                 string connectionString = ConfigurationManager.ConnectionStrings["MyConnection"].ConnectionString;
+
+            string connectionStatusMessage = string.Empty;
+
+            using (SqlConnection db = new SqlConnection(connectionString))
+            {
+                // Query to fetch departments based on the selected organization
+                string query = @"
+            SELECT d.DepartmentId, d.DepartmentName 
+            FROM Departments d
+            INNER JOIN PositionMapping pm ON d.DepartmentId = pm.DepartmentId
+            WHERE pm.OrganizationId = @OrganizationId";
+
+                var departments = db.Query<Departments>(query, new { OrganizationId = organizationId }).ToList();
+                return Json(departments);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetPositions(int organizationId, int departmentId)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["MyConnection"].ConnectionString;
+
+            string connectionStatusMessage = string.Empty;
+
+            using (SqlConnection db = new SqlConnection(connectionString))
+            {
+                // Query to fetch positions based on the selected organization and department
+                var query = @"
+            SELECT p.PositionId, p.PositionTitle 
+            FROM Positions p
+            INNER JOIN PositionMapping pm ON p.PositionId = pm.PositionId
+            WHERE pm.OrganizationId = @OrganizationId AND pm.DepartmentId = @DepartmentId";
+
+                // Execute the query with the provided organizationId and departmentId
+                var positions = db.Query<Positions>(query, new { OrganizationId = organizationId, DepartmentId = departmentId }).ToList();
+
+                return Json(positions);
+            }
+        }
+
+
         [HttpGet]
         public async Task<ActionResult> GetFilter(int? organizationId, int? departmentId, int? positionId)
         {
